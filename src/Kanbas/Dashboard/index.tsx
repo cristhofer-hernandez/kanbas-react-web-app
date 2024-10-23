@@ -1,7 +1,14 @@
 import { Link } from "react-router-dom";
-// import rocketPropulsion from "../../public/images/rocketPropulsion.jpg";
+import rocketPropulsion from "../../public/images/rocketPropulsion.jpg";
+import aero from "../../public/images/aero.jpg";
+import spacecraftDesign from "../../public/images/spacecraft_design.jpg";
+import orgo from "../../public/images/orgo.jpg";
+import inorganicChemistry from "../../public/images/Inorganic-Chemistry.png";
+import physChemistry from "../../public/images/physchem.png";
+import ancientLang from "../../public/images/ancient-lang.jpeg";
 import * as db from "../Database";
 export default function Dashboard() {
+    const images = [rocketPropulsion, aero, spacecraftDesign, orgo, inorganicChemistry, physChemistry, ancientLang]
     const courses = db.courses;
     return (
         <div id="wd-dashboard">
@@ -9,12 +16,12 @@ export default function Dashboard() {
             <h2 id="wd-dashboard-published">Published Courses ({courses.length})</h2> <hr />
             <div id="wd-dashboard-courses" className="row">
                 <div className="row row-cols-1 row-cols-md-5 g-4">
-                    {courses.map((course) => (
+                    {courses.map((course, i) => (
                         <div className="wd-dashboard-course col" style={{ width: "300px" }}>
                             <div className="card rounded-3 overflow-hidden">
                                 <Link to={`/Kanbas/Courses/${course._id}/Home`}
                                       className="wd-dashboard-course-link text-decoration-none text-dark" >
-                                    <img src={`${course.image}`} width="100%" height={160} />
+                                    <img src={images[i]} width="100%" height={160} />
                                     <div className="card-body">
                                         <h5 className="wd-dashboard-course-title card-title">
                                             {course.name} </h5>
