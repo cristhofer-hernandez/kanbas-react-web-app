@@ -1,6 +1,9 @@
 import teslabot from "./images/teslabot.jpg";
+import { useSelector } from "react-redux";
 
 export default function Lab1() {
+    const { message } = useSelector((state: any) => state.helloReducer);
+    const { count } = useSelector((state: any) => state.counterReducer);
     return (
         //beginning of lab
         //TODO: FIX how the numbers and bullet points appear on the lists
@@ -9,6 +12,11 @@ export default function Lab1() {
         <div id = "wd-lab1">
             <h2>Lab 1</h2>
             <h3>HTML Examples</h3>
+            <div id="wb-redux-examples">
+                Redux Data: <br/>
+                { message } <br/>
+                { count }
+            </div>
             <div id="wd-p-tag">
                 <h4>Paragraph Tag</h4>
 
