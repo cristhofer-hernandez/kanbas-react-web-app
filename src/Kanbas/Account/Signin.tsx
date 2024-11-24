@@ -1,4 +1,5 @@
 import { useState } from "react";
+import * as client from "./client";
 import { Link, useNavigate } from "react-router-dom";
 import { setCurrentUser } from "./reducer";
 import { useDispatch } from "react-redux";
@@ -7,9 +8,8 @@ export default function Signin() {
     const [credentials, setCredentials] = useState<any>({});
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const signin = () => {
-        const user = db.users.find(
-            (u: any) => u.username === credentials.username && u.password === credentials.password);
+    const signin = async () => {
+        const user =  await client.signin(credentials);
         if (!user) return;
         dispatch(setCurrentUser(user));
         navigate("/Kanbas/Dashboard");
@@ -17,10 +17,10 @@ export default function Signin() {
 
     return (
         <div id="wd-signin-screen d-inline-flex align-items-center">
-            <div className="row ms-5 text-start">
+            <div className="row ">
                 <h1>Sign in</h1>
             </div>
-            <div className="row ms-5">
+            <div className="row ms-2">
                 <input id="wd-username"
                        placeholder="username"
                        className="form-control mb-2"
@@ -28,7 +28,7 @@ export default function Signin() {
                        onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}/>
                 <br />
             </div>
-            <div className="row ms-5">
+            <div className="row ms-2">
             <input id="wd-password"
                    placeholder="password" type="password"
                    className="form-control mb-2"
@@ -36,7 +36,7 @@ export default function Signin() {
                    onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}/>
                 <br />
             </div>
-            <button onClick={signin} id="wd-signin-btn" className="btn btn-primary w-100" > Sign in </button>
-            <Link id="wd-signup-link" to="/Kanbas/Account/Signup">Sign up</Link>
+            <button onClick={signin} id="wd-signin-btn" className="btn btn-primary ms-2 mb-2 w-100" > Sign in </button>
+            <Link id="wd-signup-link" className="ms-3" to="/Kanbas/Account/Signup">Sign up</Link>
         </div>
     );}

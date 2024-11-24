@@ -9,7 +9,7 @@ import { FaAlignJustify } from "react-icons/fa";
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import AssignmentAdd from "./Assignments/AssignmentAdder";
-import {addAssignment} from "./Assignments/reducer";
+import {addAssignments} from "./Assignments/reducer";
 
 
 export default function Courses({ courses }: { courses: any[]; }) {
@@ -35,25 +35,7 @@ export default function Courses({ courses }: { courses: any[]; }) {
                             <Route path="Home" element={<Home />} />
                             <Route path="Modules" element={<Modules />} />
                             <Route path="Assignments" element={<Assignments />} />
-                            {/*<Route path="Assignments/:aid" element={*/}
-                            {/*    <AssignmentEditor*/}
-                            {/*        assignmentName={""}*/}
-                            {/*        setAssignmentName={(title: string) => {}}*/}
-                            {/*        assignmentAssignDate={""}*/}
-                            {/*        setAssignmentAssignDate={(title: string) => {}}*/}
-                            {/*        assignmentDueDate={""}*/}
-                            {/*        setAssignmentDueDate={(title: string) => {}}*/}
-                            {/*        assignmentPoints={""}*/}
-                            {/*        setAssignmentPoints={(title: string) => {}}*/}
-                            {/*        assignmentType={""}*/}
-                            {/*        setAssignmentType={(title: string) => {}}*/}
-                            {/*        assignmentDescription={""}*/}
-                            {/*        setAssignmentDescription={(title: string) => {}}*/}
-
-                            {/*        addAssignment={() => {*/}
-                            {/*            dispatch(addAssignment({name: assignmentName, course: ""}));*/}
-                            {/*            setAssignmentName("");*/}
-                            {/*        }}/>} />*/}
+                            <Route path="Assignments/:aid" element={<AssignmentEditor />}/>
                             <Route path="People" element={<PeopleTable />} />
                         </Routes>
                 </div>

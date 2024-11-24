@@ -3,6 +3,7 @@ import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import * as db from "../../Database";
 import { useSelector, useDispatch } from "react-redux";
 import React, { useState, useEffect } from "react";
+// import {editAssignment} from "./reducer";
 
 
 
@@ -10,19 +11,43 @@ import React, { useState, useEffect } from "react";
 export default function AssignmentAdder(
     { assignmentName, setAssignmentName, setAssignmentAssignDate, assignmentAssignDate, setAssignmentDueDate,
         assignmentDueDate, setAssignmentPoints, assignmentPoints, setAssignmentType, assignmentType,
-        setAssignmentDescription, assignmentDescription, addAssignment }:
+        setAssignmentDescription, assignmentDescription, addAssignment, editAssignment, editing }:
         { assignmentName: string; setAssignmentName: (title: string) => void;
             setAssignmentAssignDate: (date: string) => void; assignmentAssignDate: string;
             setAssignmentDueDate: (date: string) => void; assignmentDueDate: string;
             setAssignmentPoints: (date: string) => void; assignmentPoints: string;
             setAssignmentType: (date: string) => void; assignmentType: string;
             setAssignmentDescription: (date: string) => void; assignmentDescription: string;
-            addAssignment: () => void; }
+            addAssignment: () => void; editAssignment: (assignment: any) => void; editing: boolean}
 ) {
     const { aid } = useParams();
     const navigate = useNavigate();
     const assignments = db.assignments;
 
+    const handleSave = () => {
+        if (editing) {
+            // Call editAssignment if editing
+            console.log(editing);
+            console.log(assignmentName)
+            console.log(assignmentAssignDate)
+            console.log(assignmentDueDate)
+            console.log(assignmentPoints)
+            console.log(assignmentType)
+            console.log(assignmentDescription)
+            editAssignment({
+                title: assignmentName,
+                assignDate: assignmentAssignDate,
+                dueDate: assignmentDueDate,
+                points: assignmentPoints,
+                type: assignmentType,
+                description: assignmentDescription,
+            });
+        } else {
+            console.log(editing);
+            // Call addAssignment if adding
+            addAssignment();
+        }
+    }
 
 
 
@@ -216,7 +241,7 @@ export default function AssignmentAdder(
                                     {/*    // e.preventDefault();*/}
                                     {/*    // navigate(-1);*/}
                                     {/*}}>*/}
-                                    <button onClick={addAssignment} id="wd-add-assignment-btn"
+                                    <button onClick={handleSave} id="wd-add-assignment-btn"
                                             className="btn btn-lg btn-danger me-1" data-bs-dismiss="modal">
                                         Save</button>
                                     {/*</Link>*/}
