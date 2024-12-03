@@ -1,8 +1,15 @@
 import axios from "axios";
+
+const axiosWithCredentials = axios.create({ withCredentials: true });
 export const REMOTE_SERVER = process.env.REACT_APP_REMOTE_SERVER;
 export const USERS_API = `${REMOTE_SERVER}/api/users`;
 
-const axiosWithCredentials = axios.create({ withCredentials: true });
+
+export const findAllUsers = async () => {
+    const response = await axiosWithCredentials.get(USERS_API);
+    return response.data;
+};
+
 
 export const findMyCourses = async (user: any) => {
     const { data } = await axiosWithCredentials.get(`${USERS_API}/${user._id}/courses`);
@@ -51,9 +58,22 @@ export const updateUser = async (user: any) => {
     return response.data;
 };
 
-export const getUser  = async (user: any) => {
-    const response = await axiosWithCredentials.put(`${USERS_API}/${user._id}/user`, user);
+export const findUsersByRole = async (role: string) => {
+    const response = await
+        axios.get(`${USERS_API}?role=${role}`);
     return response.data;
 };
+
+export const findUsersByPartialName = async (name: string) => {
+    const response = await axios.get(`${USERS_API}?name=${name}`);
+    return response.data;
+};
+
+export const findUserById = async (id: string) => {
+    const response = await axios.get(`${USERS_API}/${id}`);
+    return response.data;
+};
+
+
 
 

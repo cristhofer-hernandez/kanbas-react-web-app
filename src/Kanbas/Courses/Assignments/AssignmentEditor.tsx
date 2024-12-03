@@ -13,12 +13,12 @@ export default function AssignmentEditor() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [assignment, setAssignment] = useState<any>(null);
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [points, setPoints] = useState(0);
-    const [type, setType] = useState("ASSIGNMENT");
-    const [dueDate, setDueDate] = useState("");
-    const [assigDate, setAssignDate] = useState("");
+    // const [title, setTitle] = useState("");
+    // const [description, setDescription] = useState("");
+    // const [points, setPoints] = useState(0);
+    // const [type, setType] = useState("ASSIGNMENT");
+    // const [dueDate, setDueDate] = useState("");
+    // const [assigDate, setAssignDate] = useState("");
     const createAssignmentForCourse = async () => {
         const course = await coursesClient.getCourseById(aid as string);
             // Confirm that the course exists (aid will be the course if we are adding an assignment instead of editing!
@@ -36,7 +36,7 @@ export default function AssignmentEditor() {
 
     const getAssignment = async () => {
         const assignment = await assignmentsClient.getAssignmentById(aid as string);
-        console.log(assignment);
+        console.log("This is the id of the assignment: ", aid);
         setAssignment(assignment);
     };
     useEffect(() => {
