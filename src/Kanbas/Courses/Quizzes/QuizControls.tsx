@@ -24,7 +24,7 @@ export default function QuizControls() {
 
     {(isFaculty &&
         <div id="wd-assignments-controls-buttons" className="ms-auto text-nowrap">
-            <Link key={`Kanbas/Courses/${ cid }/Quizzes`} to={`${cid}`}>
+            <Link key={`Kanbas/Courses/${ cid }/Quizzes`} to={`${cid}/Adder`}>
                 <button id="wd-add-assignment-btn" className="btn btn-lg btn-danger me-1">
                     <FaPlus className="position-relative me-2" style={{ bottom: "1px" }}/>
                     Quiz

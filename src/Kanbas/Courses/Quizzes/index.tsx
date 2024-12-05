@@ -24,7 +24,7 @@ export default function Quizzes(){
     const dispatch = useDispatch();
 
     const editorLink = (quiz: any) => {
-        return isFaculty ? `/Kanbas/Courses/${cid}/Quizzes/${quiz._id}` : '';
+        return isFaculty ? `/Kanbas/Courses/${cid}/Quizzes/${quiz._id}/Updater` : '';
     };
 
     const fetchQuizzes = async () => {
