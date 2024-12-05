@@ -19,10 +19,10 @@ export default function Modules() {
     const { currentUser } = useSelector((state: any) => state.accountReducer);
     const isFaculty = currentUser?.role === "FACULTY";
     const saveModule = async (module: any) => {
+        console.log("This is the module being updated: ", module)
         await modulesClient.updateModule(module);
         dispatch(updateModule(module));
     };
-
 
     const fetchModules = async () => {
         const modules = await coursesClient.findModulesForCourse(cid as string);

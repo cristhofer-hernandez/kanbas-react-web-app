@@ -18,10 +18,29 @@ export default function Kanbas() {
     });
     const { currentUser } = useSelector((state: any) => state.accountReducer);
 
+    //////////////
+    const [enrolling, setEnrolling] = useState<boolean>(false);
+    const findCoursesForUser = async () => {
+        try {
+            const courses = await userClient.findCoursesForUser(currentUser._id);
+            setCourses(courses);
+        } catch (error) {
+            console.error(error);
+        }
+    };
     const fetchCourses = async () => {
         try {
-            const courses = await userClient.findMyCourses(currentUser);
-            console.log(currentUser)
+            const allCourses = await courseClient.fetchAllCourses();
+            const enrolledCourses = await userClient.findCoursesForUser(
+                currentUser._id
+            );
+            const courses = allCourses.map((course: any) => {
+                if (enrolledCourses.find((c: any) => c._id === course._id)) {
+                    return { ...course, enrolled: true };
+                } else {
+                    return course;
+                }
+            });
             setCourses(courses);
         } catch (error) {
             console.error(error);
@@ -29,8 +48,44 @@ export default function Kanbas() {
     };
 
     useEffect(() => {
-        fetchCourses();
-    }, [currentUser]);
+        if (enrolling) {
+            fetchCourses();
+        } else {
+            findCoursesForUser();
+        }
+    }, [currentUser, enrolling]);
+
+    const updateEnrollment = async (courseId: string, enrolled: boolean) => {
+        if (enrolled) {
+            await userClient.enrollIntoCourse(currentUser._id, courseId);
+        } else {
+            await userClient.unenrollFromCourse(currentUser._id, courseId);
+        }
+        setCourses(
+            courses.map((course) => {
+                if (course._id === courseId) {
+                    return { ...course, enrolled: enrolled };
+                } else {
+                    return course;
+                }
+            })
+        );
+    };
+
+////////////////////
+    // const fetchCourses = async () => {
+    //     try {
+    //         const courses = await courseClient.fetchAllCourses();
+    //         console.log("This is the current user using cookies", currentUser)
+    //         setCourses(courses);
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // };
+
+    // useEffect(() => {
+    //     fetchCourses();
+    // }, [currentUser]);
 
     const deleteCourse = async (courseId: string) => {
         try {
@@ -42,16 +97,10 @@ export default function Kanbas() {
     };
 
     const addNewCourse = async () => {
-        try {
-            const userId = currentUser._id
-            const newCourse = await userClient.createCourse(userId, course);
-            console.log(newCourse)
-            setCourses([...courses, newCourse]);
-        }
-        catch (error) {
-            console.error("Error adding new course:", error);
-        }
+        const newCourse = await courseClient.createCourse(course);
+        setCourses([...courses, newCourse]);
     };
+
 
     const updateCourse = async () => {
         try {
@@ -65,7 +114,7 @@ export default function Kanbas() {
     };
 
     return (
-        <Session>
+        // <Session>
             <div id="wd-kanbas">
                 <KanbasNavigation />
                 <div className="wd-main-content-offset p-3">
@@ -84,6 +133,9 @@ export default function Kanbas() {
                                         addNewCourse={addNewCourse}
                                         deleteCourse={deleteCourse}
                                         updateCourse={updateCourse}
+                                        enrolling={enrolling}
+                                        setEnrolling={setEnrolling}
+                                        updateEnrollment={updateEnrollment}
                                     />
                                 </ProtectedRoute>
                             }
@@ -101,7 +153,7 @@ export default function Kanbas() {
                     </Routes>
                 </div>
             </div>
-        </Session>
+        // </Session>
     );
 }
 

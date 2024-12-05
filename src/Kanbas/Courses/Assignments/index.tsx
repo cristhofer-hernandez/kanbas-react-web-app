@@ -24,7 +24,7 @@ export default function Assignments(){
     const dispatch = useDispatch();
 
     const editorLink = (assignment: any) => {
-        return isFaculty ? `/Kanbas/Courses/${cid}/Assignments/${assignment._id}` : '';
+        return isFaculty ? `/Kanbas/Courses/${cid}/Assignments/${assignment._id}/Updater` : '';
     };
 
     const fetchAssignments = async () => {
@@ -70,7 +70,6 @@ export default function Assignments(){
                         <LuBookMarked className="me-3 ms-1 text-success"/>
                         <Link to={editorLink(assignments)}
                               className="wd-assignment fw-bold container text-decoration-none text-dark">
-                            {/* onClick={() => {editing=true}}> */}
                             {assignments.title}
                             <br/>
                             <small className="wd-subtext text-muted">

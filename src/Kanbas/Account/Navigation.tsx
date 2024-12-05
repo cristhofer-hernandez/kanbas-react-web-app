@@ -8,7 +8,7 @@ export default function AccountNavigation() {
     const [ links, setLinks ] = useState(AllLinks);
     const { pathname } = useLocation();
     const userPageForFacultyOnly = () => {
-        if (currentUser && currentUser.role === "STUDENT")  {
+        if (currentUser && currentUser.role != "ADMIN")  {
             const newLinks = links.filter((link) => link != "Users")
             setLinks(newLinks);
         }
@@ -20,7 +20,7 @@ export default function AccountNavigation() {
 
 return (
     <div id="wd-courses-navigation" className="wd list-group fs-5 rounded-0 ">
-        {links.map((link) => (
+        {currentUser && links.map((link) => (
             <Link key={`Kanbas/Account//${ link }`} to={ `${ link }` }
                   className={`
           ${pathname.includes(link) ? "list-group-item active border border-0" : "list-group-item text-danger border border-0"}`}>

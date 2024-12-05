@@ -12,22 +12,19 @@ export default function AssignmentEditor() {
     const { aid } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const location = useLocation();
+    const pathname = location.pathname;
+    const isUpdating = (pathname.substring(pathname.lastIndexOf('/') + 1) === "Updater");
     const [assignment, setAssignment] = useState<any>(null);
-    // const [title, setTitle] = useState("");
-    // const [description, setDescription] = useState("");
-    // const [points, setPoints] = useState(0);
-    // const [type, setType] = useState("ASSIGNMENT");
-    // const [dueDate, setDueDate] = useState("");
-    // const [assigDate, setAssignDate] = useState("");
+
     const createAssignmentForCourse = async () => {
         const course = await coursesClient.getCourseById(aid as string);
             // Confirm that the course exists (aid will be the course if we are adding an assignment instead of editing!
         if (!course) {
-            console.error(`Course with ID ${aid} does not exist.`);
+            console.log(`Course with ID ${aid} does not exist.`);
             return;
         }
-        console.log(aid)
-        // const newAssignment = { title: "New-Assignment", course: aid };
+        console.log("This is the id of the assignment being created: ", aid)
         const newAssignment = await coursesClient.createAssignmentsForCourse(aid as string, assignment);
         setAssignment(newAssignment);
         dispatch(addAssignments(newAssignment));
@@ -36,14 +33,14 @@ export default function AssignmentEditor() {
 
     const getAssignment = async () => {
         const assignment = await assignmentsClient.getAssignmentById(aid as string);
-        console.log("This is the id of the assignment: ", aid);
+        console.log("This is the id of the assignment currently: ", aid);
         setAssignment(assignment);
     };
     useEffect(() => {
         getAssignment()
     }, [aid]);
 
-    const saveAssignment = async() => {
+    const saveAssignment = async () => {
         try {
             await assignmentsClient.updateAssignment(assignment);
             console.log("Assignment updated successfully");
@@ -255,14 +252,13 @@ export default function AssignmentEditor() {
 
                     <button
                         onClick={async () => {
-                            try {
-                                await createAssignmentForCourse();
-                                }
-                             catch (error) {
+                            if (isUpdating) {
                                 await saveAssignment();
+                                }
+                             else {
+                                await createAssignmentForCourse();
                             }
                         }}
-                        // onClick={saveAssignment}
                             id="wd-add-assignment-btn"
                             className="btn btn-lg btn-danger me-1">
                         Save

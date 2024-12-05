@@ -15,6 +15,8 @@ import QuestionEditor from "./Quizzes/QuestionEditor";
 import MultipleChoiceEditor from "./Quizzes/MultipleChoiceEditor"
 import TrueFalseEditor from "./Quizzes/TrueFalseEditor"
 import FillInTheBlankEditor from "./Quizzes/FillInTheBlankEditor"
+import People from "./People/People";
+import Users from "../Account/Users";
 
 export default function Courses({ courses }: { courses: any[]; }) {
     const { cid } = useParams();
@@ -40,6 +42,7 @@ export default function Courses({ courses }: { courses: any[]; }) {
                             <Route path="Modules" element={<Modules />} />
                             <Route path="Assignments" element={<Assignments />} />
                             <Route path="Assignments/:aid" element={<AssignmentEditor />}/>
+                            <Route path="Assignments/:aid/Updater" element={<AssignmentEditor />}/>
                             <Route path="Quizzes" element={<Quizzes />} />
                             <Route path="Quizzes/:eid" element={<Details />}/>
                             <Route path="Quizzes/:eid/Editor" element={<QuizEditor />}/>
@@ -47,7 +50,8 @@ export default function Courses({ courses }: { courses: any[]; }) {
                             <Route path="Quizzes/:eid/QuestionEditor/MultipleChoiceEditor" element={<MultipleChoiceEditor />}/>
                             <Route path="Quizzes/:eid/QuestionEditor/TrueFalseEditor" element={<TrueFalseEditor />}/>
                             <Route path="Quizzes/:eid/QuestionEditor/FillInTheBlankEditor" element={<FillInTheBlankEditor />}/>
-                            <Route path="People" element={<PeopleTable />} />
+                            <Route path="People" element={<People courseId={course._id}/>} />
+                            <Route path="People/:uid" element={<People courseId={course._id}/>} />
                         </Routes>
                 </div>
             </div>
