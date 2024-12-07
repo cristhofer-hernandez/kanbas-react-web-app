@@ -15,9 +15,6 @@ export default function QuizEditor() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [quiz, setQuiz] = useState<any>(null);
-    const [isShuffleChecked, setIsShuffleChecked] = useState(false);
-    const [isTimedChecked, setIsTimedChecked] = useState(false);
-    const [isMultipleAttemptsChecked, setIsMultipleAttemptsChecked] = useState(false);
     const location = useLocation();
     const basePath = location.pathname.split('/').slice(0, -1).join('/');
     const isUpdating = (location.pathname.substring(location.pathname.lastIndexOf('/') + 1) === "Updating");

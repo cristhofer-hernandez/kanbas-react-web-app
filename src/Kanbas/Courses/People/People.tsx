@@ -4,7 +4,7 @@ import { FaPlus } from "react-icons/fa6";
 import PeopleTable from "./Table";
 import * as coursesClient from "../client"
 import * as client from "../../Account/client";
-export default function People({ courseId }: { courseId: string }) {
+export default function People() {
     const { cid } = useParams();
     const location = useLocation();
     const [users, setUsers] = useState<any[]>([]);
@@ -33,13 +33,13 @@ export default function People({ courseId }: { courseId: string }) {
 
 
     const fetchUsersForThisCourse = async () => {
-        const users = await coursesClient.findUsersForCourse(courseId);
+        const users = await coursesClient.findUsersForCourse(cid!);
         setUsers(users);
         console.log(users);
     };
     useEffect(() => {
         fetchUsersForThisCourse();
-    }, [courseId]);
+    }, [cid]);
     return (
         <div>
             <h3>Users</h3>

@@ -3,35 +3,34 @@ import { IoEllipsisVertical } from "react-icons/io5";
 import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import React, { useState, useEffect } from "react";
-import * as quizzesClient from "./client";
+import * as quizzesClient from "../client";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
-import * as coursesClient from "../client";
-import {addQuizzes} from "./reducer";
+import * as coursesClient from "../../client";
+import {addQuizzes} from "../reducer";
 import { FaTrash } from "react-icons/fa";
 import { FaPencil } from "react-icons/fa6";
 import { FaPlus } from "react-icons/fa6";
 
-export default function FillInTheBlankEditor() {
-    const { eid } = useParams();
+export default function TrueFalseEditor() {
+    const { q_num, eid, cid } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [quiz, setQuiz] = useState<any>(null);
 
     const location = useLocation();
     const basePath = location.pathname.split('/').slice(0, -1).join('/');
+    const pathExcludingLastTwo = location.pathname.split('/').slice(0, -2).join('/');
 
     const handleSelectedLinkChange = (e: any) => {
         const selected = e.target.value;
-
         navigate(`${basePath}/${selected}`)
     }
-
 
     const getQuiz = async () => {
         console.log("This is the quiz ID: ", eid);
         const thisQuiz = await quizzesClient.getQuizById(eid as string);
-        console.log("This is the OLD quiz object: ", thisQuiz)
+        console.log("This is the OLD quiz object (True/False): ", thisQuiz)
         setQuiz(thisQuiz);
     };
     useEffect(() => {
@@ -57,7 +56,7 @@ export default function FillInTheBlankEditor() {
         setQuiz((prev: any) => ({ ...prev, type: editorType }));
     }, [location]);
 
-    console.log("This is the quiz object that will have its Fill In the Blank Questions edited: ", quiz);
+    console.log("This is the quiz object that will have its True/False Questions edited: ", quiz);
     return (
         <div id="wd-add-assignment-dialog">
             <div className="container">
@@ -74,9 +73,9 @@ export default function FillInTheBlankEditor() {
                         <select
                             className="form-select"
                             id="wd-submission-type"
-                            value={quiz?.type || ""}
+                            value={"TrueFalseEditor"}
                             onChange={(e) => {
-                                setQuiz({ ...quiz, type: e.target.value });
+                                // setQuiz({ ...quiz, type: e.target.value });
                                 handleSelectedLinkChange(e);
                             }}>
                             <option value="MultipleChoiceEditor">Multuple Choice</option>
@@ -126,34 +125,31 @@ export default function FillInTheBlankEditor() {
                 </div>
 
                 <div className="row d-flex align-items-center mb-4">
-                    <div className="col-auto text-end text-nowrap">
-                        <label className="form-label me-2 text-nowrap" htmlFor="wd-name">Possible Answer</label>
-                    </div>
                     <div className="col-auto text-start">
-                                <textarea className="form-control " id="wd-name" style={{ height: "10px"}}
-                                          defaultValue="Unnamed Answer"
-                                          onChange={(e) => setQuiz({ ...quiz, points: e.target.value })}
-                                />
+                        <input
+                            className="form-check-input me-2"
+                            type="radio"
+                            name="answers"
+                            id="true"
+                            value="true"
+                        />
+                        <label>True</label>
                     </div>
+                </div>
+                <div className="row d-flex align-items-center mb-4">
                     <div className="col-auto text-start">
-                        {/*<FaPencil onClick={() => editModule(moduleId)} className="text-primary me-3" />*/}
-                        {/*<FaTrash className="text-danger me-2 mb-1" onClick={() => deleteModule(moduleId)}/>*/}
-                        <FaTrash className="text-danger ms-2" />
+                        <input
+                            className="form-check-input me-2"
+                            type="radio"
+                            name="answers"
+                            id="false"
+                            value="false"
+                        />
+                        <label>False</label>
                     </div>
                 </div>
 
-
-                <div className="ms-auto text-start text-nowrap">
-                    {/*<Link key={`Kanbas/Courses/${ cid }/Quizzes`} to={`Details`}>*/}
-                    <button id="wd-add-assignment-btn" className="btn btn-sm btn-secondary me-1">
-                        <FaPlus className="position-relative me-2" style={{ bottom: "1px" }}/>
-                        Add Another Answer
-                    </button>
-                    {/*</Link>*/}
-                </div>
-
-
-                <br /><br />
+                <br />
 
                 <div id="wd-assignments-controls-buttons" className="text-nowrap float-start d-inline-flex align-items-centerms-auto text-nowrap">
                     <button id="wd-add-group-btn"
