@@ -15,7 +15,7 @@ export default function MultipleChoiceEditor() {
     const [question, setQuestion ] = useState<any>({
         _id: new Date().getTime().toString(),
         title: "",
-        q_type: "Multiple Choice",
+        q_type: "MultipleChoice",
         q_points: "10",
         q_description: "",
         quiz: "",
@@ -27,6 +27,20 @@ export default function MultipleChoiceEditor() {
     const location = useLocation();
     const basePath = location.pathname.split('/').slice(0, -1).join('/');
     const pathExcludingLastTwo = location.pathname.split('/').slice(0, -2).join('/');
+    const [notEnoughAnswers, setNotEnoughAnswers] = useState(false);
+    const [answerFieldNotFilled, setAnswerFieldNotFilled] = useState(false);
+    const [descriptionFieldNotFilled, setDescriptionFieldNotFilled] = useState(false);
+    const [noCorrectChoice, setNoCorrectChoice] = useState(false);
+    const [pointDifference, setPointDifference] = useState(0);
+
+    const [showModal, setShowModal] = useState(false);
+
+    const handleSaveQuizClick = async () => {
+        if (notEnoughAnswers || answerFieldNotFilled || descriptionFieldNotFilled || noCorrectChoice) {
+            setShowModal(true); // Show the modal if any condition is true
+            return;
+        }
+    }
 
     const handleSelectedLinkChange = (e: any) => {
         const selected = e.target.value;
@@ -71,8 +85,10 @@ export default function MultipleChoiceEditor() {
 
     const updateAnswerCorrect = (index: number, newCorrect: boolean) => {
         setAnswers((answerArray: any[]) =>
-            answerArray.map((answer, i) =>
-                i === index ? {...answer, correct: newCorrect} : answer)
+            answerArray.map((answer, i) => ({
+                ...answer,
+                correct: i === index && newCorrect // Only set the clicked answer as correct
+            }))
         );
     };
 
@@ -81,30 +97,75 @@ export default function MultipleChoiceEditor() {
         setAnswers(ans);
     }
 
+    const handleEmpty = () => {
+        if (answers.length < 2) {
+            setNotEnoughAnswers(true);
+            return true;
+        }
+        if (answers.find((a: any) => a.answer === "")) {
+            setAnswerFieldNotFilled(true);
+            return true;
+        }
+        if (question.q_description === "") {
+            setDescriptionFieldNotFilled(true);
+            return true;
+        }
+        if (!(answers.find((a: any) => a.correct === true))) {
+            setNoCorrectChoice(true)
+            return true;
+        }
+        setNotEnoughAnswers(false);
+        setAnswerFieldNotFilled(false);
+        setDescriptionFieldNotFilled(false);
+        setNoCorrectChoice(false);
+        return false
+    }
+
+    const handleEmptyName = () => {
+        if (question.title === "") {
+            console.log("The title is empty");
+            const updatedQuestion = { ...question, title: `Question ${quiz.questions ? (quiz.questions.length + 1) : (1)}`, answers: answers };
+            setQuestion(updatedQuestion);
+            return updatedQuestion; // Return updated question
+        }
+        return question; // Return unchanged question if no update needed
+    };
+
+
     const saveQuiz = async() => {
         try {
-            if (answers.length < 2) {
-                alert("You need at least two multiple choice answers for this type of question")
+            if (handleEmpty()) {
                 return;
             }
+
+            const questionWithTitle = handleEmptyName();
+
             const addQuestionWithAnswers = {
-                ...question,
-                quiz: [...question.quiz, quiz], //see if this interferes
-                answers: [...question.answers, ...answers],
+                ...questionWithTitle,
+                quiz: [...questionWithTitle.quiz, quiz], //see if this interferes
+                q_type: "MultipleChoice",
+                answers: answers,
             };
 
             const addQuizWithQuestion = {
                 ...quiz,
+                points: [...(quiz.questions || []), addQuestionWithAnswers]
+                    .reduce((total, question) => total + Number(question.q_points || 0), 0),
                 questions: [...(quiz.questions || []), addQuestionWithAnswers],
             };
 
             const saveQuestionWithAnswers = {
-                ...question,
+                ...questionWithTitle,
+                q_type: "MultipleChoice",
                 answers: answers, // Directly use the updated `answers` state
             };
 
             const saveQuizWithQuestion = {
                 ...quiz,
+                points: (quiz.questions?.map((q: any) =>
+                    q._id === question._id ? saveQuestionWithAnswers : q
+                ) || [saveQuestionWithAnswers])
+                    .reduce((total: any, quest: any) => total + Number(quest.q_points || 0), 0),
                 questions: quiz.questions?.map((q: any) =>
                     q._id === question._id ? saveQuestionWithAnswers : q
                 ) || [saveQuestionWithAnswers],
@@ -148,21 +209,20 @@ export default function MultipleChoiceEditor() {
                             className="form-control"
                             id="wd-name"
                             value={question?.title || ""}
-                            onChange={(e) => setQuestion({ ...question, title: e.target.value })}
+                            onChange={(e) => setQuestion({ ...question, title: e.target.value, answers: answers })}
                         />
                     </div>
                     <div className="col-auto">
                         <select
                             className="form-select"
                             id="wd-submission-type"
-                            value={"MultipleChoiceEditor"}
+                            value={"MultipleChoice"}
                             onChange={(e) => {
-                                // setQuestion({ ...question, q_type: e.target.value });
                                 handleSelectedLinkChange(e);
                             }}>
-                            <option value="MultipleChoiceEditor">Multuple Choice</option>
-                            <option value="TrueFalseEditor">True/False</option>
-                            <option value="FillInTheBlankEditor">Fill In The Blank</option>
+                            <option value="MultipleChoice">Multuple Choice</option>
+                            <option value="TrueFalse">True/False</option>
+                            <option value="FillInTheBlank">Fill In The Blank</option>
                         </select>
                     </div>
                     <div className="col d-flex align-items-center justify-content-end">
@@ -173,7 +233,8 @@ export default function MultipleChoiceEditor() {
                             type="number"
                             value={question?.q_points || "1"}
                             onChange={(e) => {
-                                setQuestion({ ...question, q_points: e.target.value });
+                                setQuestion({ ...question, q_points: e.target.value, answers: answers });
+                                setPointDifference(pointDifference - question?.q_points)
                             }}/>
                     </div>
                 </div>
@@ -197,7 +258,7 @@ export default function MultipleChoiceEditor() {
                     <div className="col text-start">
                         <textarea className="form-control w-100" id="wd-name" style={{ height: "150px"}}
                                   value={question?.q_description || ""}
-                                  onChange={(e) => setQuestion({ ...question, q_description: e.target.value })}
+                                  onChange={(e) => setQuestion({ ...question, q_description: e.target.value, answers: answers })}
                         />
                     </div>
                 </div>
@@ -255,21 +316,49 @@ export default function MultipleChoiceEditor() {
 
             <br /><br />
 
+                {/* Modal for any question errors */}
+                {showModal &&
+                    (<div className="modal show" style={{ display: "block" }} tabIndex={-1}>
+                        <div className="modal-dialog" role="document">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title" id="exampleModalLabel">Question Error!</h5>
+                                </div>
+                                <div className="modal-body">
+                                    {notEnoughAnswers ?
+                                        "Please create at least two answers to choose from" :
+                                        (answerFieldNotFilled ?
+                                            "Please complete all of your answer choices" :
+                                            (descriptionFieldNotFilled ?
+                                                "Please describe the question" :
+                                                "Please select one answer as the correct answer choice"))}
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary"
+                                            onClick={() => setShowModal(false)}>Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>)}
+                {/* Modal for any question errors */}
+
                 <div id="wd-assignments-controls-buttons" className="text-nowrap float-start d-inline-flex align-items-centerms-auto text-nowrap">
                     <button id="wd-add-group-btn"
                             className="btn btn-sm btn-secondary me-1"
                             onClick={(e) => {
                                 e.preventDefault();
-                                navigate(-1)}}
+                                navigate(q_num ? `${pathExcludingLastTwo}` :`${basePath}`);}}
                     >
                         Cancel</button>
 
                     <button
                         onClick={async () => {
+                            handleSaveQuizClick();
                             await saveQuiz();
                         }}
                         id="wd-add-assignment-btn"
-                        className="btn btn-sm btn-danger me-1">
+                        className="btn btn-sm btn-danger me-1"
+                    >
                         Update Question
                     </button>
                 </div>

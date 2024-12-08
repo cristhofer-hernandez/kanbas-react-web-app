@@ -16,7 +16,9 @@ import MultipleChoiceEditor from "./Quizzes/Questions/MultipleChoiceEditor"
 import TrueFalseEditor from "./Quizzes/Questions/TrueFalseEditor"
 import FillInTheBlankEditor from "./Quizzes/Questions/FillInTheBlankEditor"
 import People from "./People/People";
+import QuizPreview from "./Quizzes/Preview"
 import Users from "../Account/Users";
+import QuizSubmission from "./Quizzes/Submission";
 
 export default function Courses({ courses }: { courses: any[]; }) {
     const { cid } = useParams();
@@ -50,22 +52,26 @@ export default function Courses({ courses }: { courses: any[]; }) {
                             <Route path="Quizzes/:eid/Updater/Updating" element={<QuizEditor />}/>
                             <Route path="Quizzes/:eid/Updater/QuestionEditor" element={<QuestionEditor />}/>
                             <Route path="Quizzes/:eid/Adder/QuestionEditor" element={<QuestionEditor />}/>
-                            <Route path="Quizzes/:eid/Updater/QuestionEditor/MultipleChoiceEditor" element={<MultipleChoiceEditor />}/>
-                            <Route path="Quizzes/:eid/Updater/QuestionEditor/:q_num/MultipleChoiceEditor" element={<MultipleChoiceEditor />}/>
-                            <Route path="Quizzes/:eid/Adder/QuestionEditor/MultipleChoiceEditor" element={<MultipleChoiceEditor />}/>
-                            <Route path="Quizzes/:eid/Adder/QuestionEditor/:q_num/MultipleChoiceEditor" element={<MultipleChoiceEditor />}/>
+                            <Route path="Quizzes/:eid/Updater/QuestionEditor/MultipleChoice" element={<MultipleChoiceEditor />}/>
+                            <Route path="Quizzes/:eid/Updater/QuestionEditor/:q_num/MultipleChoice" element={<MultipleChoiceEditor />}/>
+                            <Route path="Quizzes/:eid/Adder/QuestionEditor/MultipleChoice" element={<MultipleChoiceEditor />}/>
+                            <Route path="Quizzes/:eid/Adder/QuestionEditor/:q_num/MultipleChoice" element={<MultipleChoiceEditor />}/>
 
-                            <Route path="Quizzes/:eid/Updater/QuestionEditor/TrueFalseEditor" element={<TrueFalseEditor />}/>
-                            <Route path="Quizzes/:eid/Updater/QuestionEditor/:q_num/TrueFalseEditor" element={<TrueFalseEditor />}/>
-                            <Route path="Quizzes/:eid/Adder/QuestionEditor/TrueFalseEditor" element={<TrueFalseEditor />}/>
-                            <Route path="Quizzes/:eid/Adder/QuestionEditor/:q_num/TrueFalseEditor" element={<TrueFalseEditor />}/>
+                            <Route path="Quizzes/:eid/Updater/QuestionEditor/TrueFalse" element={<TrueFalseEditor />}/>
+                            <Route path="Quizzes/:eid/Updater/QuestionEditor/:q_num/TrueFalse" element={<TrueFalseEditor />}/>
+                            <Route path="Quizzes/:eid/Adder/QuestionEditor/TrueFalse" element={<TrueFalseEditor />}/>
+                            <Route path="Quizzes/:eid/Adder/QuestionEditor/:q_num/TrueFalse" element={<TrueFalseEditor />}/>
 
-                            <Route path="Quizzes/:eid/Updater/QuestionEditor/FillInTheBlankEditor" element={<FillInTheBlankEditor />}/>
-                            <Route path="Quizzes/:eid/Updater/QuestionEditor/:q_num/FillInTheBlankEditor" element={<FillInTheBlankEditor />}/>
-                            <Route path="Quizzes/:eid/Adder/QuestionEditor/FillInTheBlankEditor" element={<FillInTheBlankEditor />}/>
-                            <Route path="Quizzes/:eid/Adder/QuestionEditor/:q_num/FillInTheBlankEditor" element={<FillInTheBlankEditor />}/>
+                            <Route path="Quizzes/:eid/Updater/QuestionEditor/FillInTheBlank" element={<FillInTheBlankEditor />}/>
+                            <Route path="Quizzes/:eid/Updater/QuestionEditor/:q_num/FillInTheBlank" element={<FillInTheBlankEditor />}/>
+                            <Route path="Quizzes/:eid/Adder/QuestionEditor/FillInTheBlank" element={<FillInTheBlankEditor />}/>
+                            <Route path="Quizzes/:eid/Adder/QuestionEditor/:q_num/FillInTheBlank" element={<FillInTheBlankEditor />}/>
                             <Route path="People" element={<People />} />
                             <Route path="People/:uid" element={<People />} />
+                            <Route path="Quizzes/:eid/Updater/:qid" element={<QuizPreview />}/>
+                            <Route path="Quizzes/:eid/Adder/:qid" element={<QuizPreview />}/>
+                            <Route path="Quizzes/:eid/Updater/Submission" element={<QuizSubmission />}/>
+                            <Route path="Quizzes/:eid/Adder/Submission" element={<QuizSubmission />}/>
                         </Routes>
                 </div>
             </div>

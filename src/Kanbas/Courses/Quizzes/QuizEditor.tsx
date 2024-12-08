@@ -382,7 +382,7 @@ export default function QuizEditor() {
                         className="btn btn-lg btn-secondary me-1"
                         onClick={(e) => {
                             e.preventDefault();
-                            navigate(-2)}}
+                            navigate(basePath)}}
                 >
                     Cancel</button>
 

@@ -27,6 +27,7 @@ const quizSlice = createSlice({
                 available_date: quiz.available_date,
                 until_date: quiz.until_date,
                 points: quiz.points,
+                correct_answer: quiz.correct_answer,
                 show_correct_answers: quiz.show_correct_answers,
                 one_question_at_a_time: quiz.one_question_at_a_time,
                 lock_questions: quiz.lock_questions,
@@ -34,6 +35,7 @@ const quizSlice = createSlice({
                 access_code: quiz.access_code,
                 course: quiz.course,
                 description: quiz.description,
+                published: quiz.published,
                 questions: quiz.questions,
             };
             state.quizzes = [...state.quizzes, newQuiz] as any;

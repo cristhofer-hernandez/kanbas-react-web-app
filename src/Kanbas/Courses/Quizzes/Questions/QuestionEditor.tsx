@@ -17,11 +17,22 @@ export default function QuestionEditor() {
     const location = useLocation();
     const basePath = location.pathname.split('/').slice(0, -1).join('/');
     const isUpdater = (basePath === `/Kanbas/Courses/${ cid }/Quizzes/${ eid }/Updater`)
-    const [questions, setQuestions] = useState<any>(null);
+    const [questions, setQuestions] = useState<any>([]);
+    const [points, setPoints] = useState(0);
 
     const deleteQuestion = (question: any) => {
-        const quest = questions.filter((q: any) => q != question);
-        setQuestions(quest);
+        const updatedQuestions = questions.filter((q: any) => q !== question);
+
+        const updatedPoints = updatedQuestions.reduce(
+            (total: any, q: any) => total + Number(q.q_points || 0),
+            0
+        );
+
+        setQuestions(updatedQuestions);
+        setQuiz((oldQuiz: any) => ({
+            ...oldQuiz,
+            points: updatedPoints,
+        }));
     }
 
     const getQuiz = async () => {
@@ -36,15 +47,6 @@ export default function QuestionEditor() {
         console.log("This is the quiz object that will have its questions edited: ", quiz);
     }, [eid]);
 
-    // useEffect(() => {
-    //     if (quiz) {
-    //         // Find the question that matches the provided `q_num`
-    //         // const updatedQuiz = quiz.find((q: any) => q._id === eid);
-    //         setQuiz(quiz)
-    //         } else {
-    //         console.warn("Cannot find quiz with ID: ", eid);
-    //     }
-    // }, [quiz, eid]);
 
     const saveQuiz = async() => {
 
@@ -64,6 +66,14 @@ export default function QuestionEditor() {
         }
     }
 
+    const getAllPoints = () => {
+        if (questions) {
+            let sum = 0;
+            questions.forEach((q: any) => sum += q.q_points);
+            setPoints(sum)
+        }
+    }
+
 
     console.log("This is the quiz object that will have its questions edited: ", quiz);
     return (
@@ -71,7 +81,7 @@ export default function QuestionEditor() {
             <div className="container">
                 <div className="row d-flex align-items-end justify-content-end">
                     <div className="col d-flex justify-content-end">
-                        <h4 className="form-label me-2">Points</h4>
+                        <h4 className="form-label me-2">Points: {quiz?.points}</h4>
                         <h4 className="form-label me-2">Not Published</h4>
                         <button id="wd-calendar-icon col" className="input-group-text">
                             <IoEllipsisVertical />
@@ -96,7 +106,7 @@ export default function QuestionEditor() {
 
 
                 <div id="wd-assignments-controls-buttons" className="text-nowrap float-center d-inline-flex align-items-centerms-auto text-nowrap">
-                    <Link to={`${basePath}/QuestionEditor/MultipleChoiceEditor`} className="nav-link text-danger" aria-current="page">
+                    <Link to={`${basePath}/QuestionEditor/MultipleChoice`} className="nav-link text-danger" aria-current="page">
                         <button id="wd-add-group-btn"
                                 className="btn btn-lg btn-secondary me-1"
                         >
@@ -120,9 +130,9 @@ export default function QuestionEditor() {
                             <div className=" ">
                                 <h3>Points: {question?.q_points || ""} </h3>
                             </div>
-                            <Link to={(question?.q_type === "Multiple Choice") ? `${basePath}/QuestionEditor/${question?._id}/MultipleChoiceEditor` :
-                                      (question?.q_type === "True/False") ? `${basePath}/QuestionEditor/${question?._id}/TrueFalseEditor` :
-                                      `${basePath}/QuestionEditor/${question?._id}/FillInTheBlankEditor` }>
+                            <Link to={(question?.q_type === "MultipleChoice") ? `${basePath}/QuestionEditor/${question?._id}/MultipleChoice` :
+                                      (question?.q_type === "TrueFalse") ? `${basePath}/QuestionEditor/${question?._id}/TrueFalse` :
+                                      `${basePath}/QuestionEditor/${question?._id}/FillInTheBlank` }>
                                 <div>
                                     <FaPencil className="text-primary"/>
                                 </div>
@@ -144,7 +154,9 @@ export default function QuestionEditor() {
                             <p className="d-flex align-items-center ms-2">
                                 {answer.answer}
                                 <strong className="ms-2">
-                                    {answer.correct ? "(Correct)" : "(Incorrect)"}
+                                    {question.q_type === "MultipleChoice" || question.q_type === "FillInTheBlank"
+                                        ? (answer.correct ? "(Correct)" : "(Incorrect)")
+                                        : (answer.correct ? "True" : "False")}
                                 </strong>
                             </p>
                         </div>
@@ -159,7 +171,7 @@ export default function QuestionEditor() {
                         className="btn btn-lg btn-secondary me-1"
                         onClick={(e) => {
                             e.preventDefault();
-                            navigate(-1)}}
+                            navigate(basePath)}}
                 >
                     Cancel</button>
 

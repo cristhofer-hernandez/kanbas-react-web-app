@@ -10,7 +10,7 @@ import { CiEdit } from "react-icons/ci";
 import {addQuizzes} from "./reducer";
 
 export default function Details() {
-    const { eid } = useParams();
+    const { cid, eid } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const location = useLocation();
@@ -28,12 +28,19 @@ export default function Details() {
     return (
         <div className="container">
             <div id="wd-add-assignment-dialog">
-                <div id="wd-assignments-controls-buttons" className="text-nowrap d-inline-flex align-items-centerms-auto text-nowrap">
+                <Link to={`/Kanbas/Courses/${cid}/Quizzes`}
+                      id="wd-add-assignment-btn"
+                      className="float-start text-danger mt-2">
+                    &lt; Back
+                </Link>
+                <div id="wd-assignments-controls-buttons" className="text-nowrap d-inline-flex text-start text-nowrap">
                     <button id="wd-add-group-btn"
                             className="btn btn-md btn-secondary me-4"
                             onClick={(e) => {
                                 e.preventDefault();
-                                navigate(-1)}}
+                                console.log(quiz?.questions);
+                                navigate(quiz?.questions ? `${ location.pathname }/${quiz.questions[0]._id}`
+                                                          : `${location.pathname}`)}}
                     >
                         Preview</button>
 
