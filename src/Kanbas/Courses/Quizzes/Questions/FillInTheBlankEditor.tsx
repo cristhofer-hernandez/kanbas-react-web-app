@@ -143,7 +143,6 @@ export default function FillInTheBlankEditor() {
 
             const addQuestionWithAnswers = {
                 ...questionWithTitle,
-                quiz: [...questionWithTitle.quiz, quiz], //see if this interferes
                 q_type: "FillInTheBlank",
                 answers: answers,
             };

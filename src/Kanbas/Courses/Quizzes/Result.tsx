@@ -26,6 +26,7 @@ export default function Result() {
     const [result, setResult] = useState<any>(null);
     const location = useLocation();
     const basePath = location.pathname.split('/').slice(0, -2).join('/');
+    const facultyBasePath = location.pathname.split('/').slice(0, -1).join('/');
     const isUpdater = (basePath === `/Kanbas/Courses/${ cid }/Quizzes/${ eid }/Updater`)
     const [questions, setQuestions] = useState<any>(null);
 
@@ -134,7 +135,11 @@ export default function Result() {
                     className="btn btn-lg btn-danger me-1 mt-2"
                     onClick={async (e) => {
                         await findResultForQuizAndUser();
-                        navigate(`${location.pathname}/${questions ? questions[0]._id : ""}`);
+                        try {
+                            navigate(`${location.pathname}/${questions ? questions[0]._id : ""}`);
+                        } catch (error) {
+                            console.warn("This quiz has no questions", error)
+                        }
                     }}
             >
                 Take Quiz  </button>) :
@@ -205,7 +210,8 @@ export default function Result() {
                 </div>)}
             <hr />
 
-            <div id="wd-assignments-controls-buttons" className="text-nowrap float-start align-items-centerms-auto"
+            {currentUser.role !== "FACULTY" && (
+                <div id="wd-assignments-controls-buttons" className="text-nowrap float-start align-items-centerms-auto"
             >
                 <Link to={`${basePath}`} className="nav-link text-danger" aria-current="page">
                     <button id="wd-add-group-btn"
@@ -214,7 +220,20 @@ export default function Result() {
                         &lt; Back To Quizzes  </button>
                 </Link>
 
-            </div>
+            </div>)}
+
+            {currentUser.role === "FACULTY" && (
+                <div id="wd-assignments-controls-buttons" className="text-nowrap float-start align-items-centerms-auto"
+                >
+                    <Link to={facultyBasePath} className="nav-link text-danger" aria-current="page">
+                        <button id="wd-add-group-btn"
+                                className="btn btn-lg btn-secondary me-1"
+                        >
+                            &lt; Back To Quiz Details  </button>
+                    </Link>
+
+                </div>)}
+
 
             <br /> < br/>
 

@@ -146,12 +146,19 @@ export default function QuizPreview() {
     const saveResult = async (submitting: boolean = false) => {
         try {
             console.log("This is the result right before it is updated and saved: ", result);
+            let questionExists = false;
+
             const updatedQuestions = result.questions ? [...result.questions] : [];
             updatedQuestions.forEach((r: any, index: number) => {
                 if (r._id === questionCopy._id) {
                     updatedQuestions[index] = { ...r, ...questionCopy };
+                    questionExists = true;
                 }
             });
+
+            if (!questionExists) {
+                updatedQuestions.push(questionCopy);
+            }
 
             if (!submitting) {
                 const saveResultWithQuestion = {

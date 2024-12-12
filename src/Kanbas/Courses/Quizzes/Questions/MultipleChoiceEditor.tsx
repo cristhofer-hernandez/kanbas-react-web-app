@@ -125,9 +125,10 @@ export default function MultipleChoiceEditor() {
             console.log("The title is empty");
             const updatedQuestion = { ...question, title: `Question ${quiz.questions ? (quiz.questions.length + 1) : (1)}`, answers: answers };
             setQuestion(updatedQuestion);
-            return updatedQuestion; // Return updated question
+            return updatedQuestion;
         }
-        return question; // Return unchanged question if no update needed
+        console.log("This is question: ", question)
+        return question;
     };
 
 
@@ -141,7 +142,6 @@ export default function MultipleChoiceEditor() {
 
             const addQuestionWithAnswers = {
                 ...questionWithTitle,
-                quiz: [...questionWithTitle.quiz, quiz], //see if this interferes
                 q_type: "MultipleChoice",
                 answers: answers,
             };

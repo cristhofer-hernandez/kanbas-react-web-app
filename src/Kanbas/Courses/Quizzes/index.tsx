@@ -26,6 +26,9 @@ export default function Quizzes(){
     const [published, setPublished] = useState(false);
     const isFaculty = currentUser?.role === "FACULTY";
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const [showMenu, setShowMenu] = useState<string | null>(null); ;
+
 
     const editorLink = (quiz: any) => {
         return isFaculty ? `${quiz._id}/Updater` :
@@ -65,6 +68,18 @@ export default function Quizzes(){
         }
     };
 
+    const handleShowMenu = async (updatedQuiz: any) => {
+        try {
+            await quizzesClient.updateQuiz(updatedQuiz);
+            const updatedQuizzes = quizzes.map((q: any) =>
+                q._id === updatedQuiz._id ? {...q, show_menu: updatedQuiz.show_menu} : q
+            );
+            dispatch(setQuizzes(updatedQuizzes)); // Update Redux state to reflect the change
+            console.log("This is the updated quiz: ", updatedQuiz);
+        } catch (error) {
+            console.error("Error updating quiz:", error);
+        }
+    };
 
     return (
         <div className="me-2">
@@ -88,9 +103,9 @@ export default function Quizzes(){
                             {quiz.name}
                             <br/>
                             <small className="wd-subtext text-muted">
-                                <small className="text-danger">Multiple Modules</small> |
+                                <small className="text-danger">Quiz</small> |
                                 <small className="fw-bold"> Not avaialable until</small> {quiz.assign_date} |
-                                <small className="fw-bold"> {quiz.due_date} | {quiz.points} pts</small>
+                                <small className="fw-bold"> Due: {quiz.due_date} | Worth: {quiz.points} pts</small>
                             </small>
                         </Link>
                         {(isFaculty &&
@@ -112,8 +127,66 @@ export default function Quizzes(){
                                                     publishQuiz(updatedQuiz);
                                                 }}/>)}
                             <FaTrash className="text-danger ms-3" onClick={() => deleteQuiz(quiz._id)}/>
-                            <IoEllipsisVertical className="ms-3"/>
-                        </div>
+                            {/*<div className="position-relative">*/}
+                                <IoEllipsisVertical className="ms-3"
+                                                    onClick={() => {
+                                                        const updatedQuiz = { ...quiz, show_menu: !quiz.show_menu }
+                                                        handleShowMenu(updatedQuiz)
+                                                    }}
+                                                    style={{ cursor: "pointer" }} />
+                                {quiz.show_menu && (
+                                    <div
+                                        className="dropdown-menu"
+                                        style={{
+                                            position: "absolute",
+                                            top: "100%",
+                                            right: 0,
+                                            display: "block",
+                                            backgroundColor: "white",
+                                            border: "1px solid #ddd",
+                                            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                                            borderRadius: "4px",
+                                            zIndex: 1000,
+                                        }}
+                                    >
+                                        <button
+                                            type="button"
+                                            className="dropdown-item btn btn-secondary btn-sm"
+                                            onClick={() => {
+                                                const updatedQuiz = { ...quiz, show_menu: !quiz.show_menu }
+                                                handleShowMenu(updatedQuiz)
+                                                navigate(editorLink(quiz));
+                                            }}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="dropdown-item btn btn-secondary btn-sm"
+                                            onClick={() => {
+                                                const updatedQuiz = { ...quiz, show_menu: !quiz.show_menu }
+                                                handleShowMenu(updatedQuiz)
+                                                deleteQuiz(quiz._id)
+                                            }}
+                                        >
+                                            Delete
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="dropdown-item btn btn-secondary btn-sm"
+                                            onClick={() => {
+                                                const updatedQuiz = { ...quiz, show_menu: !quiz.show_menu }
+                                                const publihedQuiz = { ...updatedQuiz, published: !updatedQuiz.published }
+                                                handleShowMenu(publihedQuiz);
+                                                publishQuiz(publihedQuiz);
+                                            }}
+                                        >
+                                            {quiz.published ? "Unpublish" : "Publish"}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        // </div>
                             )}
                             <ul className="wd-lessons list-group rounded-0">
                             </ul>

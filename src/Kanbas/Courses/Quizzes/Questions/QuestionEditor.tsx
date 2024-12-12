@@ -183,12 +183,14 @@ export default function QuestionEditor() {
                             e.preventDefault();
                             if (!isUpdater && quiz) {
                                 try {
-                                    deleteQuiz(quiz._id)
+                                    deleteQuiz(quiz._id);
+                                    navigate(`/Kanbas/Courses/${ cid }/Quizzes`);
                                 } catch (error) {
                                     console.error("There is no quiz to delete", error)
                                 }
-                            }
-                            navigate(basePath)}}
+                            } else {
+                            navigate(basePath)}
+                        }}
                 >
                     Cancel</button>
 

@@ -20,9 +20,9 @@ export default function QuizEditor() {
         name: "New Quiz",
         type: "Graded Quiz",
         group: "",
-        shuffle: false,
-        timed: false,
-        minutes: 0,
+        shuffle: true,
+        timed: true,
+        minutes: 20,
         multiple_attempts: false,
         attempts_allowed: 1,
         due_date: "",
@@ -31,11 +31,12 @@ export default function QuizEditor() {
         until_date: "",
         points: 0,
         show_correct_answers: false,
-        one_question_at_a_time: false,
+        one_question_at_a_time: true,
         lock_questions: false,
         webcam_required: false,
         access_code: "",
         published: false,
+        show_menu: false,
         course: null,
         description: "",
         });
@@ -48,17 +49,17 @@ export default function QuizEditor() {
     const createQuizForCourse = async () => {
         console.log("Course ID (cid):", cid);
         const course = await coursesClient.getCourseById(cid as string);
-            // Confirm that the course exists (aid will be the course if we are adding an assignment instead of editing!
         if (!course) {
             console.error(`Course with ID ${cid} does not exist.`);
             return;
         }
-        console.log(cid)
-        // const newAssignment = { title: "New-Assignment", course: aid };
-        const newQuiz = await coursesClient.createQuizzesForCourse(eid as string, quiz);
+        console.log("This is the quiz before being added:", quiz);
+        const newQuiz = await coursesClient.createQuizzesForCourse(cid as string, quiz);
         setQuiz(newQuiz);
+        console.log("This is the new quiz created: ", newQuiz)
         dispatch(addQuizzes(newQuiz));
-        // navigate(isUpdater ? `/Kanbas/Courses/${ cid }/Quizzes/${ eid }/Updater` : `/Kanbas/Courses/${ cid }/Quizzes/${ eid }/Adder`);
+
+        navigate((isUpdater) ? `${basePath}/QuestionEditor` : `/Kanbas/Courses/${ cid }/Quizzes/${newQuiz._id}/Adder/QuestionEditor`)
     };
 
     const removeQuiz = async (quizId: string) => {
@@ -97,7 +98,7 @@ export default function QuizEditor() {
         try {
             await quizzesClient.updateQuiz(updatedQuiz);
             console.log("Assignment updated successfully");
-            navigate(`/Kanbas/Courses/${ cid }/Quizzes/${ eid }/Updater`);
+            navigate(`/Kanbas/Courses/${ cid }/Quizzes/`);
         } catch (error) {
             console.error("Error updating assignment:", error);
         }
@@ -143,10 +144,11 @@ export default function QuizEditor() {
                           aria-current="page">Details</Link>
                 </li>
                 <li className="nav-item">
-                    <Link to={`${basePath}/QuestionEditor`} className="nav-link text-danger" aria-current="page"
-                        // onClick={() => (quiz && !isUpdater) ? createQuizForCourse() : ""}
+                    <a className="nav-link text-danger" aria-current="page"
+                        onClick={() => (quiz && !isUpdater) ? createQuizForCourse() : navigate(`${basePath}/QuestionEditor`)}
                     >
-                        Questions</Link>
+                        Questions
+                    </a>
                 </li>
             </ul>
 
@@ -378,7 +380,7 @@ export default function QuizEditor() {
                                     Assign To
                                 </label>
                                 <input className="form-control" id="wd-name"
-                                       defaultValue={quiz?.assign_to || ""}
+                                       value={quiz?.assign_to || ""}
                                        onChange={(e) => setQuiz({ ...quiz, assign_to: e.target.value })}/>
                                 <br /><br />
 
@@ -388,8 +390,9 @@ export default function QuizEditor() {
                                 </label>
                                 <div className="input-group">
                                     <input className="form-control" id="wd-name"
-                                           defaultValue={quiz?.due_date || ""}
+                                           value={quiz?.due_date || ""}
                                            onChange={(e) => setQuiz({ ...quiz, due_date: e.target.value })}
+                                           type="date"
                                     />
                                     <button id="wd-calendar-icon col"
                                             className="input-group-text">
@@ -407,8 +410,9 @@ export default function QuizEditor() {
                                         </label>
                                         <div className="input-group">
                                             <input className="form-control" id="wd-name"
-                                                   defaultValue={quiz?.available_date || ""}
+                                                   value={quiz?.available_date || ""}
                                                    onChange={(e) => setQuiz({ ...quiz, available_date: e.target.value })}
+                                                   type="date"
                                             />
                                             <button id="wd-calendar-icon col"
                                                     className="input-group-text">
@@ -423,8 +427,9 @@ export default function QuizEditor() {
                                         </label>
                                         <div className="input-group">
                                                 <input className="form-control" id="wd-name"
-                                                       defaultValue={quiz?.until_date || ""}
+                                                       value={quiz?.until_date || ""}
                                                        onChange={(e) => setQuiz({ ...quiz, until_date: e.target.value })}
+                                                       type="date"
                                                 />
                                                 <button id="wd-calendar-icon col" className="input-group-text">
                                                    <FaCalendarAlt />
@@ -447,14 +452,16 @@ export default function QuizEditor() {
                         className="btn btn-lg btn-secondary me-1"
                         onClick={(e) => {
                             e.preventDefault();
-                            if (!isUpdater && quiz) {
+                            if (!isUpdater && quiz && quiz._id) {
                                 try {
-                                    deleteQuiz(quiz._id)
+                                    deleteQuiz(quiz._id);
+                                    navigate(`/Kanbas/Courses/${ cid }/Quizzes`);
                                 } catch (error) {
                                     console.error("There is no quiz to delete", error)
                                 }
-                            }
-                            navigate(basePath)}}
+                            } else {
+                            navigate(`/Kanbas/Courses/${ cid }/Quizzes`)}
+                        }}
                 >
                     Cancel</button>
 
@@ -466,7 +473,7 @@ export default function QuizEditor() {
                             }
                          else {
                             await createQuizForCourse();
-                            navigate(`/Kanbas/Courses/${ cid }/Quizzes/`);
+                            navigate(basePath);
                         }
                     }}
                         id="wd-add-assignment-btn"

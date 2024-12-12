@@ -120,9 +120,8 @@ export default function TrueFalseEditor() {
 
             const saveQuestionWithAnswers = {
                 ...questionWithTitle,
-                quiz: [...questionWithTitle.quiz, quiz],
                 q_type: "TrueFalse",
-                answers: answers, // Directly use the updated `answers` state
+                answers: answers,
             };
 
             const addQuizWithQuestion = {
