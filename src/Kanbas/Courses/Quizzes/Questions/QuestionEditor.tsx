@@ -8,6 +8,8 @@ import React, { useState, useEffect } from "react";
 import * as quizzesClient from "../client";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
+import * as quizClient from "../client";
+import {deleteQuizzes} from "../reducer";
 
 export default function QuestionEditor() {
     const { cid, eid } = useParams();
@@ -19,6 +21,15 @@ export default function QuestionEditor() {
     const isUpdater = (basePath === `/Kanbas/Courses/${ cid }/Quizzes/${ eid }/Updater`)
     const [questions, setQuestions] = useState<any>([]);
     const [points, setPoints] = useState(0);
+
+    const removeQuiz = async (quizId: string) => {
+        await quizClient.deleteQuiz(quizId);
+        dispatch(deleteQuizzes(quizId));
+    };
+
+    const deleteQuiz = (quizId: string) => {
+        removeQuiz(quizId)
+    };
 
     const deleteQuestion = (question: any) => {
         const updatedQuestions = questions.filter((q: any) => q !== question);
@@ -95,7 +106,7 @@ export default function QuestionEditor() {
                 {/* Tabs */}
                 <ul className="nav nav-tabs">
                     <li className="nav-item">
-                        <Link to={isUpdater ? `${basePath}/Updating` : `${basePath}/Adding`} className="nav-link text-danger" aria-current="page">Active</Link>
+                        <Link to={isUpdater ? `${basePath}/Updating` : `${basePath}/Adding`} className="nav-link text-danger" aria-current="page">Details</Link>
                     </li>
                     <li className="nav-item">
                         <Link to={`${basePath}/QuestionEditor`} className="nav-link active" aria-current="page">Questions</Link>
@@ -115,7 +126,6 @@ export default function QuestionEditor() {
                     </Link>
                 </div>
 
-            </div>
 
             <hr />
 
@@ -171,6 +181,13 @@ export default function QuestionEditor() {
                         className="btn btn-lg btn-secondary me-1"
                         onClick={(e) => {
                             e.preventDefault();
+                            if (!isUpdater && quiz) {
+                                try {
+                                    deleteQuiz(quiz._id)
+                                } catch (error) {
+                                    console.error("There is no quiz to delete", error)
+                                }
+                            }
                             navigate(basePath)}}
                 >
                     Cancel</button>
@@ -185,5 +202,6 @@ export default function QuestionEditor() {
                 </button>
             </div>
         </div>
+    </div>
 
     );}

@@ -7,14 +7,39 @@ import * as quizzesClient from "./client";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import * as coursesClient from "../client";
-import {addQuizzes} from "./reducer";
+import {addQuizzes, deleteQuizzes} from "./reducer";
+import * as quizClient from "./client";
 
 export default function QuizEditor() {
     const { eid } = useParams();
     const { cid } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [quiz, setQuiz] = useState<any>(null);
+
+    const [quiz, setQuiz] = useState<any>({
+        name: "New Quiz",
+        type: "Graded Quiz",
+        group: "",
+        shuffle: false,
+        timed: false,
+        minutes: 0,
+        multiple_attempts: false,
+        attempts_allowed: 1,
+        due_date: "",
+        assign_date: "",
+        available_date: "",
+        until_date: "",
+        points: 0,
+        show_correct_answers: false,
+        one_question_at_a_time: false,
+        lock_questions: false,
+        webcam_required: false,
+        access_code: "",
+        published: false,
+        course: null,
+        description: "",
+        });
+
     const location = useLocation();
     const basePath = location.pathname.split('/').slice(0, -1).join('/');
     const isUpdating = (location.pathname.substring(location.pathname.lastIndexOf('/') + 1) === "Updating");
@@ -34,15 +59,25 @@ export default function QuizEditor() {
         setQuiz(newQuiz);
         dispatch(addQuizzes(newQuiz));
         // navigate(isUpdater ? `/Kanbas/Courses/${ cid }/Quizzes/${ eid }/Updater` : `/Kanbas/Courses/${ cid }/Quizzes/${ eid }/Adder`);
-        navigate(`/Kanbas/Courses/${ cid }/Quizzes/`);
+    };
+
+    const removeQuiz = async (quizId: string) => {
+        await quizClient.deleteQuiz(quizId);
+        dispatch(deleteQuizzes(quizId));
+    };
+
+    const deleteQuiz = (quizId: string) => {
+        removeQuiz(quizId)
     };
 
     const getQuiz = async () => {
-        console.log("This is the quiz ID: ", eid);
         const thisQuiz = await quizzesClient.getQuizById(eid as string);
-        console.log("This is the OLD quiz object: ", thisQuiz)
-        setQuiz(thisQuiz);
+        setQuiz((prevQuiz: any) => ({
+            ...prevQuiz,
+            ...thisQuiz,
+        }));
     };
+
     useEffect(() => {
         getQuiz();
         console.log("This is the NEW quiz object: ", quiz);
@@ -58,13 +93,40 @@ export default function QuizEditor() {
         }
     }
 
+    const saveAndPublish = async (updatedQuiz: any) => {
+        try {
+            await quizzesClient.updateQuiz(updatedQuiz);
+            console.log("Assignment updated successfully");
+            navigate(`/Kanbas/Courses/${ cid }/Quizzes/${ eid }/Updater`);
+        } catch (error) {
+            console.error("Error updating assignment:", error);
+        }
+    }
+
+    const createAndPublish = async (updatedQuiz: any) => {
+        console.log("Course ID (cid):", cid);
+        const course = await coursesClient.getCourseById(cid as string);
+        // Confirm that the course exists (aid will be the course if we are adding an assignment instead of editing!
+        if (!course) {
+            console.error(`Course with ID ${cid} does not exist.`);
+            return;
+        }
+        console.log(cid)
+        // const newAssignment = { title: "New-Assignment", course: aid };
+        const newQuiz = await coursesClient.createQuizzesForCourse(eid as string, updatedQuiz);
+        setQuiz(newQuiz);
+        dispatch(addQuizzes(newQuiz));
+        // navigate(isUpdater ? `/Kanbas/Courses/${ cid }/Quizzes/${ eid }/Updater` : `/Kanbas/Courses/${ cid }/Quizzes/${ eid }/Adder`);
+        navigate(`/Kanbas/Courses/${ cid }/Quizzes/`);
+    };
+
     return (
         <div id="wd-add-assignment-dialog">
             <div className="container">
                 <div className="row d-flex align-items-end justify-content-end">
                     <div className="col d-flex justify-content-end">
-                        <h4 className="form-label me-2">Points</h4>
-                        <h4 className="form-label me-2">Not Published</h4>
+                        <h4 className="form-label me-4">Points: {quiz?.points}</h4>
+                        <h4 className="form-label me-4">{quiz?.published ? "Published" : "Not Published"}</h4>
                         <button id="wd-calendar-icon col" className="input-group-text">
                             <IoEllipsisVertical />
                         </button>
@@ -78,10 +140,13 @@ export default function QuizEditor() {
             <ul className="nav nav-tabs">
                 <li className="nav-item">
                     <Link to={isUpdater ? `${basePath}/Updating` : `${basePath}/Adding`} className="nav-link active"
-                          aria-current="page">Active</Link>
+                          aria-current="page">Details</Link>
                 </li>
                 <li className="nav-item">
-                    <Link to={`${basePath}/QuestionEditor`} className="nav-link text-danger" aria-current="page">Questions</Link>
+                    <Link to={`${basePath}/QuestionEditor`} className="nav-link text-danger" aria-current="page"
+                        // onClick={() => (quiz && !isUpdater) ? createQuizForCourse() : ""}
+                    >
+                        Questions</Link>
                 </li>
             </ul>
 
@@ -382,6 +447,13 @@ export default function QuizEditor() {
                         className="btn btn-lg btn-secondary me-1"
                         onClick={(e) => {
                             e.preventDefault();
+                            if (!isUpdater && quiz) {
+                                try {
+                                    deleteQuiz(quiz._id)
+                                } catch (error) {
+                                    console.error("There is no quiz to delete", error)
+                                }
+                            }
                             navigate(basePath)}}
                 >
                     Cancel</button>
@@ -394,11 +466,27 @@ export default function QuizEditor() {
                             }
                          else {
                             await createQuizForCourse();
+                            navigate(`/Kanbas/Courses/${ cid }/Quizzes/`);
                         }
                     }}
                         id="wd-add-assignment-btn"
                         className="btn btn-lg btn-danger me-1">
                     Save
+                </button>
+                <button
+                    //THis DOES work, just change the try/catch to a conditional and it will work!
+                    onClick={async () => {
+                        const publishedQuiz = { ...quiz, published: true };
+                        if (isUpdating) {
+                            await saveAndPublish(publishedQuiz);
+                        }
+                        else {
+                            await createAndPublish(publishedQuiz);
+                        }
+                    }}
+                    id="wd-add-assignment-btn"
+                    className="btn btn-lg btn-success me-1">
+                    Save & Publish
                 </button>
             </div>
         </div>
