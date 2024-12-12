@@ -19,6 +19,7 @@ import People from "./People/People";
 import QuizPreview from "./Quizzes/Preview"
 import Users from "../Account/Users";
 import QuizSubmission from "./Quizzes/Submission";
+import Result from "./Quizzes/Result"
 
 export default function Courses({ courses }: { courses: any[]; }) {
     const { cid } = useParams();
@@ -69,9 +70,15 @@ export default function Courses({ courses }: { courses: any[]; }) {
                             <Route path="People" element={<People />} />
                             <Route path="People/:uid" element={<People />} />
                             <Route path="Quizzes/:eid/Updater/:qid" element={<QuizPreview />}/>
+                            <Route path="Quizzes/:eid/Updater/Results/:qid" element={<QuizPreview />}/>
                             <Route path="Quizzes/:eid/Adder/:qid" element={<QuizPreview />}/>
+                            <Route path="Quizzes/:eid/Adder/Results/:qid" element={<QuizPreview />}/>
+                            <Route path="Quizzes/:eid/Results/:qid" element={<QuizPreview />}/>
                             <Route path="Quizzes/:eid/Updater/Submission" element={<QuizSubmission />}/>
                             <Route path="Quizzes/:eid/Adder/Submission" element={<QuizSubmission />}/>
+                            <Route path="Quizzes/:eid/Results" element={<Result />}/>
+                            <Route path="Quizzes/:eid/Updater/Results" element={<Result />}/>
+                            <Route path="Quizzes/:eid/Adder/Results" element={<Result />}/>
                         </Routes>
                 </div>
             </div>

@@ -19,7 +19,6 @@ export default function TrueFalseEditor() {
     const [quiz, setQuiz] = useState<any>(null);
     const [answers, setAnswers] = useState<any>([]);
     const [question, setQuestion ] = useState<any>({
-        _id: new Date().getTime().toString(),
         title: "",
         q_type: "TrueFalse",
         q_points: "10",

@@ -19,7 +19,6 @@ export default function FillInTheBlankEditor() {
     const [quiz, setQuiz] = useState<any>(null);
     const [answers, setAnswers] = useState<any>([]);
     const [question, setQuestion ] = useState<any>({
-        _id: new Date().getTime().toString(),
         title: "",
         q_type: "FillInTheBlank",
         q_points: "10",

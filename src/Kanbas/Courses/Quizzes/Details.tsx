@@ -14,6 +14,7 @@ export default function Details() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const location = useLocation();
+    const basePath = location.pathname.split('/').slice(0, -1).join('/');
     const isEditing = (location.pathname.substring(location.pathname.lastIndexOf('/') + 1) === "Updater");
     const [quiz, setQuiz] = useState<any>(null);
 
@@ -39,7 +40,7 @@ export default function Details() {
                             onClick={(e) => {
                                 e.preventDefault();
                                 console.log(quiz?.questions);
-                                navigate(quiz?.questions ? `${ location.pathname }/${quiz.questions[0]._id}`
+                                navigate(quiz?.questions ? `${ location.pathname }/Results`
                                                           : `${location.pathname}`)}}
                     >
                         Preview</button>

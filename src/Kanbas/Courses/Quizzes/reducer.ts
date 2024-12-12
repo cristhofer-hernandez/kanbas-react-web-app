@@ -36,6 +36,7 @@ const quizSlice = createSlice({
                 course: quiz.course,
                 description: quiz.description,
                 published: quiz.published,
+                results: quiz.results,
                 questions: quiz.questions,
             };
             state.quizzes = [...state.quizzes, newQuiz] as any;

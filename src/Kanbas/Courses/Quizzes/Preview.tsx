@@ -3,12 +3,18 @@ import { FaPencil } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
 import { IoEllipsisVertical } from "react-icons/io5";
 import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import React, { useState, useEffect } from "react";
 import * as quizzesClient from "./client";
 import "react-datepicker/dist/react-datepicker.css";
 import { CiCircleAlert } from "react-icons/ci";
 import DatePicker from "react-datepicker";
+import * as coursesClient from "../client";
+import {addQuizzes} from "./reducer";
+import {addResult} from "./resultsReducer"
+import {createResultForQuiz} from "./client";
+import * as resultsClient from "./resultsClient";
+import {updateResult} from "./resultsClient";
 
 export default function QuizPreview() {
     const { cid, eid, qid } = useParams();
@@ -25,68 +31,55 @@ export default function QuizPreview() {
     const [checked, setChecked] = useState(false);
     const [blankAnswer, setBlankAnswer] = useState("");
     const [points, setPoints] = useState(0);
+    const { currentUser } = useSelector((state: any) => state.accountReducer);
+    const [result, setResult] = useState<any>(null);
 
-    const updateQuestionCorrect = (question: any, answers: any, answer: any, newCorrect: boolean) => {
-        const isAnswerCorrect = answer.correct === newCorrect;
-        // console.log(answer);
-        setQuestionCopy((prevState: any) => ({
-            ...prevState,
-            correct_answer: isAnswerCorrect,
+    const updateQuestionCorrect = (question: any, answer: any) => {
+        const saveQuestion = {
+            ...question,
+            correct_answer: answer.correct,
             answer_chosen: answer.answer,
-        }));
 
-        // setQuestionCopy(saveQuestionWithAnswers);
-        // console.log(saveQuestionWithAnswers);
-        console.log("QuestionCopy changed in function: ", questionCopy);
+        }
+        setQuestionCopy(saveQuestion);
+
+        // console.log("QuestionCopy changed in function: ", saveQuestion);
 
     };
 
-    const updateTrueFalse = (question: any, answers: any, answer: any, answerChosen: string) => {
-        const answerSelected = (answerChosen === "true");
+    const updateTrueFalse = (question: any, answer: any, answerChosen: string) => {
+        console.log("Was True or False chosen? :", answerChosen)
+        const answerSelected = (answerChosen == "True");
+        console.log("Was True or False chosen? :", answerSelected)
+        console.log("What is the answer to the True/False question? :",  answer.correct )
         const isAnswerCorrect = answer.correct === answerSelected;
 
-        setQuestionCopy((prevState: any) => ({
-            ...prevState,
+        const saveQuestion = {
+            ...question,
             correct_answer: isAnswerCorrect,
-            answer_chosen: answer.answer,
-        }));
+            answer_chosen: answerChosen,
 
-        // console.log(question);
+        }
+        setQuestionCopy(saveQuestion);
+
+        console.log("QuestionCopy changed in function: ", saveQuestion);
     };
 
-    const checkBlankCorrect = (question: any, answers: any, newAnswer: string) => {
-        const isAnswerCorrect = answers.findIndex((a: any) => a.answer === newAnswer) !== -1;
-
-        setQuestionCopy((prevState: any) => ({
-            ...prevState,
+    const checkBlankCorrect = (question: any, newAnswer: string) => {
+        const isAnswerCorrect = question.answers.some((a: any) => a.answer === newAnswer);
+        console.log("Did an answer match?", isAnswerCorrect)
+        const saveQuestion = {
+            ...question,
             correct_answer: isAnswerCorrect,
             answer_chosen: newAnswer,
-        }));
+
+        }
+        setQuestionCopy(saveQuestion);
+
+
+        console.log("QuestionCopy changed in function: ", saveQuestion);
 
     };
-    //
-    useEffect(() => {
-        if (questionCopy != null && quiz != null) {
-            // setQuestion(question)
-            const saveQuizWithQuestion = {
-                ...quiz,
-                questions: quiz.questions?.map((q: any) =>
-                    q._id === questionCopy._id ? questionCopy : q
-                ) || [questionCopy],
-            };
-            setQuiz(saveQuizWithQuestion)
-            // console.log(question)
-            console.log("This is the updated quiz: ", quiz)
-        }
-    }, [questionCopy]);
-
-    useEffect(() => {
-        if (qid) {
-            const newQuestion = questions.find((q: any) => q._id === qid);
-            setQuestion(newQuestion);
-            // setQuestionCopy(newQuestion);
-        }
-    }, [qid, questions]);
 
     const getQuiz = async () => {
         const thisQuiz = await quizzesClient.getQuizById(eid as string);
@@ -95,13 +88,43 @@ export default function QuizPreview() {
         setQuestions(thisQuiz.questions);
         setQuestion(thisQuiz.questions.find((q: any) => (q._id === qid)))
         // setQuestionCopy(thisQuiz.questions.find((q: any) => (q._id === qid)))
-        console.log("This is the first instance of question ", question)
-        console.log("This is the first instance of questionCopy ", questionCopy)
+        // console.log("This is the first instance of question ", question)
+        // console.log("This is the first instance of questionCopy ", questionCopy)
+        console.log("This is the quiz ", thisQuiz)
     };
+
+    const getQuestions = async () => {
+        if (quiz) {
+            setQuestions(quiz.questions);
+            setQuestion(quiz.questions.find((q: any) => (q._id === qid)))
+            console.log("This is the first instance of question ", question)
+            console.log("This is the first instance of questionCopy ", questionCopy)
+        }
+    };
+
     useEffect(() => {
         getQuiz();
-        // console.log("This is the quiz object that will have its questions edited: ", quiz);
+        getResult();
     }, [eid, qid]);
+
+    useEffect(() => {
+        getQuestions();
+        console.log("This is the result that was retireved in the beggining", result)
+    }, [quiz]);
+
+    const getResult = async () => {
+        try {
+            const thisResult = await quizzesClient.findResultForQuizAndUser(eid as string, currentUser._id);
+            console.log("This is the first instance of Result: ", thisResult);
+
+            setResult(thisResult);
+        } catch (error) {
+            console.error("Error fetching result for quiz:", error);
+        }
+    };
+
+
+
 
     const getNextQuestionIndex = () => {
         const nextQuestionIndex = questions?.findIndex((q: any) => q._id === qid) + 1;
@@ -116,27 +139,57 @@ export default function QuizPreview() {
         if (lastQuestionIndex < 0) {
             return -1
         }
-        // console.log(lastQuestionIndex)
 
         return lastQuestionIndex;
     };
 
-    const saveQuiz = async() => {
-
+    const saveResult = async (submitting: boolean = false) => {
         try {
-            await quizzesClient.updateQuiz(quiz);
-            console.log("Assignment updated successfully");
+            console.log("This is the result right before it is updated and saved: ", result);
+            const updatedQuestions = result.questions ? [...result.questions] : [];
+            updatedQuestions.forEach((r: any, index: number) => {
+                if (r._id === questionCopy._id) {
+                    updatedQuestions[index] = { ...r, ...questionCopy };
+                }
+            });
+
+            if (!submitting) {
+                const saveResultWithQuestion = {
+                    ...result,
+                    questions: updatedQuestions,
+                };
+                await resultsClient.updateResult(saveResultWithQuestion);
+                setResult(saveResultWithQuestion)
+                console.log("Result updated successfully: ", saveResultWithQuestion);
+
+            } else {
+                const updatedPoints = updatedQuestions.reduce(
+                    (sum: number, q: any) => {
+                        if (q.correct_answer) {
+                            return sum + Number(q.q_points || 0);
+                        }
+                        return sum;
+                    },
+                    0
+                );
+
+                const saveResultWithQuestion = {
+                    ...result,
+                    attempts_taken: (result.attempts_taken ?? 0) + 1,
+                    points: updatedPoints,
+                    questions: updatedQuestions,
+                };
+
+                await resultsClient.updateResult(saveResultWithQuestion);
+                setResult(saveResultWithQuestion)
+                console.log("Result updated successfully: ", saveResultWithQuestion);
+            }
 
         } catch (error) {
-            console.error("Error updating assignment:", error);
+            console.error("Error updating result:", error);
         }
     }
 
-    // This function messes up my code for some reason
-
-
-
-    // console.log("This is the quiz object that will have its questions edited: ", quiz);
     return (
         <div id="wd-add-assignment-dialog">
             <div className="row text-start">
@@ -146,12 +199,12 @@ export default function QuizPreview() {
 
             <br />
 
-            <div className="card" style={{ backgroundColor: "#f69697" }}>
+            {currentUser.role === "FACULTY" && (<div className="card" style={{ backgroundColor: "#f69697" }}>
                 <div className="card-body text-start">
                     <CiCircleAlert />
                     This is a preview of the published version of the quiz.
                 </div>
-            </div>
+            </div>)}
 
             <hr />
 
@@ -186,9 +239,9 @@ export default function QuizPreview() {
                                             id={`index-${index}-${answer.answer}`}
                                             checked={questionCopy?.answer_chosen === answer.answer}
                                             onChange={(e) => {
-                                                updateQuestionCorrect(question, answers, answer, e.target.checked);
-                                                console.log("QuestionCopy changed after updating answer: ", questionCopy);
-                                                console.log("question changed after updating answer: ", questionCopy);
+                                                updateQuestionCorrect(question, answer);
+                                                // console.log("QuestionCopy changed after updating answer: ", questionCopy);
+                                                // console.log("question changed after updating answer: ", questionCopy);
                                             }}
                                             />
                                         <label className="d-flex align-items-center ms-2">
@@ -205,10 +258,10 @@ export default function QuizPreview() {
                                                     className="form-check-input me-2"
                                                     type="radio"
                                                     name="answers"
-                                                    id="true"
-                                                    value="true"
+                                                    id="True"
+                                                    value="True"
                                                     onChange={(e) => {
-                                                        updateTrueFalse(question, answers, answer, e.target.value);
+                                                        updateTrueFalse(question, answer, e.target.value);
                                                     }}
                                                 />
                                                 <label>True</label>
@@ -220,10 +273,10 @@ export default function QuizPreview() {
                                                     className="form-check-input me-2"
                                                     type="radio"
                                                     name="answers"
-                                                    id="false"
-                                                    value="false"
+                                                    id="False"
+                                                    value="False"
                                                     onChange={(e) => {
-                                                        updateTrueFalse(question, answers, answer, e.target.value);
+                                                        updateTrueFalse(question, answer, e.target.value);
                                                     }}
                                                 />
                                                 <label>False</label>
@@ -246,7 +299,7 @@ export default function QuizPreview() {
                                     onChange={(e) => {
                                         const newBlankAnswer = e.target.value;
                                         setBlankAnswer(newBlankAnswer);
-                                        checkBlankCorrect(question, answers, newBlankAnswer)
+                                        checkBlankCorrect(question, newBlankAnswer)
                                     }}
                                 />
                             </div>
@@ -256,7 +309,10 @@ export default function QuizPreview() {
 
             {questions && (getLastQuestionIndex() > -1) &&
                 (<div id="wd-assignments-controls-buttons" className="text-nowrap float-start align-items-centerms-auto">
-                    <Link to={`${basePath}/${questions[getLastQuestionIndex()]._id}`} className="nav-link text-danger" aria-current="page">
+                    <Link to={`${basePath}/${questions[getLastQuestionIndex()]._id}`} className="nav-link text-danger" aria-current="page"
+                          onClick={async () => {
+                              await saveResult();
+                          }}>
                         <button id="wd-add-group-btn"
                                 className="btn btn-lg btn-secondary me-1"
                         >
@@ -267,7 +323,10 @@ export default function QuizPreview() {
 
             {questions && (getNextQuestionIndex() != -1) &&
                 (<div id="wd-assignments-controls-buttons" className="text-nowrap float-end align-items-centerms-auto">
-                <Link to={`${basePath}/${questions[getNextQuestionIndex()]._id}`} className="nav-link text-danger" aria-current="page">
+                <Link to={`${basePath}/${questions[getNextQuestionIndex()]._id}`} className="nav-link text-danger" aria-current="page"
+                      onClick={async () => {
+                          await saveResult();
+                      }}>
                     <button id="wd-add-group-btn"
                             className="btn btn-lg btn-secondary me-1"
                     >
@@ -281,9 +340,10 @@ export default function QuizPreview() {
 
             <div id="wd-assignments-controls-buttons" className="text-nowrap float-end align-items-centerms-auto"
             >
-                <Link to={`${basePath}/Submission`} className="nav-link text-danger" aria-current="page"
+                <Link to={`${basePath}`}
+                      className="nav-link text-danger" aria-current="page"
                       onClick={async () => {
-                          await saveQuiz();
+                          await saveResult(true);
                       }}
                 >
                     <button id="wd-add-group-btn"
@@ -297,7 +357,7 @@ export default function QuizPreview() {
             <br /> < br/> <br /> <br />
 
 
-            <div
+            {(currentUser.role === "FACULTY") && (<div
                 id="wd-assignments-controls-buttons"
                 className="text-nowrap container-fluid d-flex justify-content-center align-items-center">
                 <Link to={`${basePath}`} className="nav-link text-danger w-100" aria-current="page">
@@ -308,7 +368,7 @@ export default function QuizPreview() {
                         Keep Editing This Quiz
                     </button>
                 </Link>
-            </div>
+            </div>)}
 
             <br />
 
@@ -317,7 +377,7 @@ export default function QuizPreview() {
                     <div className="text-start mb-1">
                         <Link to={`${ basePath }/${question._id}`} className="text-danger"
                               onClick={async () => {
-                                  await saveQuiz();
+                                  await saveResult();
                               }}
                         >
                             {question.title}
