@@ -158,12 +158,9 @@ export default function TrueFalseEditor() {
         }
     }
 
-    //This changes the selected option to the current selected option (MC/True or False/Fill in the Blank)
     useEffect(() => {
-        // Extract the current editor type from the path (This is the location at the end of the link)
         const editorType = location.pathname.split("/").pop();
 
-        // Update quiz.type based on the current link received from above
         setQuiz((prev: any) => ({ ...prev, type: editorType }));
     }, [location]);
 
